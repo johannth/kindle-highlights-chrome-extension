@@ -1,0 +1,12 @@
+{
+  "name": "kindle-highlights-chrome-extension",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build-dev": "chrome-extension run src/manifest.json -o dist"
+  },
+  "devDependencies": {
+    "chrome-extension-scripts": "^0.9.5"
+  }
+}
