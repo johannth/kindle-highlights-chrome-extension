@@ -1,6 +1,8 @@
+import { combineReducers } from 'redux';
+
 import { RECEIVE_BOOKS, RECEIVE_DATA_FOR_BOOK } from '../actions';
 
-function rootReducer(state, action) {
+function dataReducer(state = {}, action) {
   switch (action.type) {
     case RECEIVE_BOOKS:
       const books = action.books.reduce(
@@ -22,4 +24,5 @@ function rootReducer(state, action) {
   }
 }
 
+const rootReducer = combineReducers({ data: dataReducer });
 export default rootReducer;
