@@ -1,9 +1,11 @@
 {
   "manifest_version": 2,
-  "content_scripts": [
-    {
-      "matches": ["https://kindle.amazon.com/"],
-      "js": ["content/index.js"]
-    }
+  "background": {
+    "persistent": true,
+    "scripts": ["background/index.js"]
+  },
+  "permissions": [
+    "cookies",
+    "*://*.amazon.com/*"
   ]
 }

@@ -4,9 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build-dev": "chrome-extension run src/manifest.json -o dist"
+    "build-dev": "chrome-extension run src/manifest.json -o dist",
+    "build": "chrome-extension build src/manifest.json -o dist"
   },
   "devDependencies": {
     "chrome-extension-scripts": "^0.9.5"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "redux": "^3.6.0",
+    "redux-logger": "^2.7.4",
+    "redux-thunk": "^2.2.0"
   }
 }
