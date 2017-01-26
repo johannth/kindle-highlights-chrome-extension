@@ -4,6 +4,10 @@
     "persistent": true,
     "scripts": ["background/index.js"]
   },
+  "browser_action": {
+    "default_title": "Webpack chrome extension popup action",
+    "default_popup": "popup/index.html"
+  },
   "permissions": [
     "cookies",
     "*://*.amazon.com/*"
