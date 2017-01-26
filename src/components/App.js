@@ -22,6 +22,7 @@ const AppPage = ({ books, highlights, loading, onReloadData }) => (
   <div id="content">
     <div id="menu">
       <ReloadDataButton isLoading={loading.data} onClick={onReloadData} />
+      <DownloadAllAsJSONLink books={books} highlights={highlights} />
     </div>
     <BookList
       books={books}
@@ -31,6 +32,32 @@ const AppPage = ({ books, highlights, loading, onReloadData }) => (
   </div>
 );
 
+const createJsonFromAllHighlights = (books, highlights) => {
+  return {
+    books: books.reduce((accumulator, book) => {
+      if (highlights[book.id].length > 0) {
+        accumulator[book.id] = {
+          book: book,
+          highlights: highlights[book.id] || []
+        };
+      }
+      return accumulator;
+    }, {})
+  };
+};
+
+const DownloadAllAsJSONLink = ({ books, highlights }) => (
+  <DownloadLink
+    className="menu-button"
+    filename="highlights.json"
+    mediaType="application/json"
+    content={
+      JSON.stringify(createJsonFromAllHighlights(books, highlights), null, 2)
+    }
+  >
+    Download all highlights as JSON
+  </DownloadLink>
+);
 const ReloadDataButton = ({ isLoading, onClick }) => (
   <div
     className="menu-button"
@@ -67,8 +94,11 @@ BookList.propTypes = {
   ).isRequired
 };
 
-const DownloadLink = ({ filename, mediaType, content, children }) => (
+const DownloadLink = (
+  { filename, mediaType, content, className, children }
+) => (
   <a
+    className={className}
     download={filename}
     href={createDataUrl(mediaType, content)}
     target="_blank"
@@ -76,6 +106,11 @@ const DownloadLink = ({ filename, mediaType, content, children }) => (
     {children}
   </a>
 );
+DownloadLink.propTypes = {
+  filename: PropTypes.string.isRequired,
+  mediaType: PropTypes.string.isRequired,
+  content: PropTypes.string.isRequired
+};
 
 const createDataUrl = (mediaType, content) => {
   const base64encodedContent = base64.encode(content);
@@ -90,10 +125,11 @@ const Book = ({ id, name, highlights, isLoading }) => (
             filename={`${id}-${name}.json`}
             mediaType="application/json"
             content={
-              JSON.stringify({
-                book: { id: id, name: name },
-                highlights: highlights
-              })
+              JSON.stringify(
+                { book: { id: id, name: name }, highlights: highlights },
+                null,
+                2
+              )
             }
           >
             Download {highlights.length} highlights as JSON

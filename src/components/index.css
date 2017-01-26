@@ -6,21 +6,17 @@
 
 #menu {
   display: flex;
-  padding: 5px;
-  background-color: gray;
 }
 
 .menu-button {
-  width: 60px;
   padding: 5px;
   color: black;
   text-align: center;
   text-decoration: none;
   border: 1px solid black;
   border-radius: 2px;
+  margin-right: 10px
 }
-
-
 
 #booklist {
   list-style-type: none;
