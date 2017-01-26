@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
+import base64 from 'base-64';
 
 import css from './index.css';
 import { fetchData } from '../actions';
@@ -53,7 +54,7 @@ const BookList = ({ books, highlights, booksLoading }) => (
           <Book
             id={book.id}
             name={book.name}
-            numberOfHighlights={(highlights[book.id] || []).length}
+            highlights={highlights[book.id] || []}
             isLoading={booksLoading[book.id]}
           />
         </li>
@@ -66,10 +67,26 @@ BookList.propTypes = {
   ).isRequired
 };
 
-const Book = ({ id, name, numberOfHighlights = 0, isLoading }) => (
+const encodeHighlightsAsJSONDataUrl = (bookId, bookName, highlights) => {
+  const base64encodeData = base64.encode(
+    JSON.stringify({
+      book: { id: bookId, name: bookName },
+      highlights: highlights
+    })
+  );
+  return `data:application/json;base64,${base64encodeData}`;
+};
+
+const Book = ({ id, name, highlights, isLoading }) => (
   <div className={classnames('book', isLoading ? 'loading' : '')}>
     <h4 className="book-title">{name}</h4>
-    <p className="book-summary">Highlights: {numberOfHighlights}</p>
+    <a
+      download={`${id}-${name}.json`}
+      href={encodeHighlightsAsJSONDataUrl(id, highlights)}
+      target="_blank"
+    >
+      Download {highlights.length} highlights as JSON
+    </a>
   </div>
 );
 Book.propTypes = {

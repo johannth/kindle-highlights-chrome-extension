@@ -11,6 +11,7 @@
     "chrome-extension-scripts": "^0.9.5"
   },
   "dependencies": {
+    "base-64": "^0.1.0",
     "cheerio": "^0.22.0",
     "classnames": "^2.2.5",
     "react": "^15.4.2",
