@@ -33,7 +33,7 @@ const AppPage = ({ books, highlights, loading, onReloadData }) => (
 
 const ReloadDataButton = ({ isLoading, onClick }) => (
   <div
-    id="reload-data-button"
+    className="menu-button"
     onClick={e => {
         if (!isLoading) {
           e.preventDefault();
@@ -67,26 +67,38 @@ BookList.propTypes = {
   ).isRequired
 };
 
-const encodeHighlightsAsJSONDataUrl = (bookId, bookName, highlights) => {
-  const base64encodeData = base64.encode(
-    JSON.stringify({
-      book: { id: bookId, name: bookName },
-      highlights: highlights
-    })
-  );
-  return `data:application/json;base64,${base64encodeData}`;
+const DownloadLink = ({ filename, mediaType, content, children }) => (
+  <a
+    download={filename}
+    href={createDataUrl(mediaType, content)}
+    target="_blank"
+  >
+    {children}
+  </a>
+);
+
+const createDataUrl = (mediaType, content) => {
+  const base64encodedContent = base64.encode(content);
+  return `data:${mediaType};base64,${base64encodedContent}`;
 };
 
 const Book = ({ id, name, highlights, isLoading }) => (
   <div className={classnames('book', isLoading ? 'loading' : '')}>
     <h4 className="book-title">{name}</h4>
-    <a
-      download={`${id}-${name}.json`}
-      href={encodeHighlightsAsJSONDataUrl(id, highlights)}
-      target="_blank"
-    >
-      Download {highlights.length} highlights as JSON
-    </a>
+    {highlights.length > 0 && (
+          <DownloadLink
+            filename={`${id}-${name}.json`}
+            mediaType="application/json"
+            content={
+              JSON.stringify({
+                book: { id: id, name: name },
+                highlights: highlights
+              })
+            }
+          >
+            Download {highlights.length} highlights as JSON
+          </DownloadLink>
+        )}
   </div>
 );
 Book.propTypes = {

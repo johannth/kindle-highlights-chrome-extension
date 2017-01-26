@@ -10,7 +10,7 @@
   background-color: gray;
 }
 
-#reload-data-button {
+.menu-button {
   width: 60px;
   padding: 5px;
   color: black;
@@ -19,6 +19,8 @@
   border: 1px solid black;
   border-radius: 2px;
 }
+
+
 
 #booklist {
   list-style-type: none;
