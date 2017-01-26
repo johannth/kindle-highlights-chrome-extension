@@ -1,6 +1,6 @@
 import cheerio from 'cheerio';
 
-export const REQUEST_DATA = 'REQUEST_POSTS';
+export const REQUEST_DATA = 'REQUEST_DATA';
 function requestData() {
   return { type: REQUEST_DATA };
 }
@@ -32,11 +32,15 @@ export function fetchData() {
     return fetchBooks().then(books => {
       dispatch(receiveBooks(books));
 
-      books.forEach((book, i) => {
-        dispatch(requestDataForBook(book.id));
-        fetchAllHighlights(book.id).then(highlights => {
-          dispatch(receiveDataForBook(book.id, highlights));
-        });
+      Promise.all(
+        books.map((book, i) => {
+          dispatch(requestDataForBook(book.id));
+          return fetchAllHighlights(book.id).then(highlights => {
+            dispatch(receiveDataForBook(book.id, highlights));
+          });
+        })
+      ).then(_ => {
+        dispatch(receiveData());
       });
     });
   };
@@ -73,7 +77,7 @@ function fetchPageOfBooks(bookPage) {
       let $ = cheerio.load(text);
       let books = $('.titleAndAuthor a').map((i, element) => {
         let urlParts = $(element).attr('href').split('/');
-        return { id: urlParts[urlParts.length - 1], text: $(element).text() };
+        return { id: urlParts[urlParts.length - 1], name: $(element).text() };
       }).toArray();
       return { items: books, hasMore: books.length > 0 };
     });

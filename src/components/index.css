@@ -1,0 +1,35 @@
+#content {
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#menu {
+  display: flex;
+  padding: 5px;
+  background-color: gray;
+}
+
+#reload-data-button {
+  width: 60px;
+  padding: 5px;
+  color: black;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid black;
+  border-radius: 2px;
+}
+
+#booklist {
+  list-style-type: none;
+  padding: 0px;
+  margin-top: 10px;
+}
+
+.book {
+  height: 40px;
+}
+
+.loading {
+  opacity: 0.5;
+}

@@ -7,7 +7,6 @@ import createLogger from 'redux-logger';
 import persistState from 'redux-localstorage';
 import rootReducer from '../reducers';
 import App from '../components/App';
-import { fetchData } from '../actions';
 
 const loggerMiddleware = createLogger();
 
