@@ -30,6 +30,14 @@
   height: 40px;
 }
 
+.book-title {
+  margin: 0;
+}
+
+.book-summary {
+  margin: 5px 0 0 0;
+}
+
 .loading {
-  opacity: 0.5;
+  opacity: 0.6;
 }

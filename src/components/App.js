@@ -17,12 +17,16 @@ const sortByKey = key => (a, b) => {
   }
 };
 
-const AppPage = ({ books, loading, onReloadData }) => (
+const AppPage = ({ books, highlights, loading, onReloadData }) => (
   <div id="content">
     <div id="menu">
       <ReloadDataButton isLoading={loading.data} onClick={onReloadData} />
     </div>
-    <BookList books={books} booksLoading={loading.books} />
+    <BookList
+      books={books}
+      highlights={highlights}
+      booksLoading={loading.books}
+    />
   </div>
 );
 
@@ -42,13 +46,14 @@ ReloadDataButton.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
-const BookList = ({ books, booksLoading }) => (
+const BookList = ({ books, highlights, booksLoading }) => (
   <ul id="booklist">
     {books.map(book => (
         <li key={book.id}>
           <Book
             id={book.id}
             name={book.name}
+            numberOfHighlights={(highlights[book.id] || []).length}
             isLoading={booksLoading[book.id]}
           />
         </li>
@@ -61,9 +66,10 @@ BookList.propTypes = {
   ).isRequired
 };
 
-const Book = ({ id, name, isLoading }) => (
+const Book = ({ id, name, numberOfHighlights = 0, isLoading }) => (
   <div className={classnames('book', isLoading ? 'loading' : '')}>
-    {name}
+    <h4 className="book-title">{name}</h4>
+    <p className="book-summary">Highlights: {numberOfHighlights}</p>
   </div>
 );
 Book.propTypes = {
@@ -74,7 +80,8 @@ Book.propTypes = {
 const mapStateToProps = state => {
   return {
     books: Object.values(state.data.books).sort(sortByKey('name')),
-    loading: state.loading
+    loading: state.loading,
+    highlights: state.data.highlights
   };
 };
 
