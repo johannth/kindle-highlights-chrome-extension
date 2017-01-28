@@ -15,11 +15,11 @@ To run this extension it is easiest to run it unpacked:
 1. Clone this repository
 2. Install all dependencies
 
-      yarn install
+            yarn install
 
 3. Compile the extension using
 
-      yarn run build
+            yarn run build
 
 4. Open [chrome://extensions](chrome://extensions)
 5. Choose "Load unpacked extensions"
@@ -29,11 +29,11 @@ To run this extension it is easiest to run it unpacked:
 
 1. Install all dependencies
 
-      yarn install
+            yarn install
 
 2. Start the webpack dev server
 
-      yarn run build-dev
+            yarn run build-dev
       
 4. Open [chrome://extensions](chrome://extensions)
 5. Choose "Load unpacked extensions"
