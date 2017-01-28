@@ -17,24 +17,18 @@ const AppPage = ({ books, highlights, files, loading, onReloadData }) => (
     <div id="menu">
       <ReloadDataButton isLoading={loading.data} onClick={onReloadData} />
       {files && (
-            <div>
+            <div className="download-links">
               <DownloadLink file={files.json}>
-                ⬇️ JSON
+                Download JSON
               </DownloadLink>
               <DownloadLink file={files.markdown}>
-                ⬇️ Markdown
+                Download Markdown
               </DownloadLink>
             </div>
           )}
     </div>
     <BookList books={books} highlights={highlights} />
   </div>
-);
-
-const DownloadAllAsJSONLink = ({ books, highlights }) => (
-  <DownloadLink className="menu-button" file={''}>
-    Download all highlights as JSON
-  </DownloadLink>
 );
 
 const ReloadDataButton = ({ isLoading, onClick }) => (
@@ -55,12 +49,13 @@ ReloadDataButton.propTypes = {
 
 const BookList = ({ books, highlights }) => (
   <ul id="booklist">
-    {books.map(book => (
+    {books.map((book, i) => (
         <li key={book.id}>
           <Book
             book={book}
             highlights={highlights[book.id] || []}
             files={createDownloadFilesFromBook(book, highlights[book.id])}
+            className={i % 2 == 0 ? 'row-even' : 'row-odd'}
           />
         </li>
       ))}
@@ -74,7 +69,7 @@ BookList.propTypes = {
 
 const DownloadLink = ({ file, className, children }) => (
   <a
-    className={className}
+    className={classnames('download-link', className)}
     download={file.name}
     href="#"
     onClick={e => {
@@ -95,16 +90,17 @@ DownloadLink.propTypes = {
   className: PropTypes.string
 };
 
-const Book = ({ book, highlights, files }) => (
-  <div className="book">
-    <h4 className="book-title">{book.title}</h4>
+const Book = ({ book, highlights, files, className }) => (
+  <div className={classnames('book', className)}>
+    <h4 className="book-title"><a href={book.url}>{book.title}</a></h4>
+    <p className="book-authors">{book.authors.join(', ')}</p>
     {files && (
           <div>
             <DownloadLink file={files.json}>
-              ⬇️ JSON
+              Download JSON
             </DownloadLink>
             <DownloadLink file={files.markdown}>
-              ⬇️ Markdown
+              Download Markdown
             </DownloadLink>
           </div>
         )}
