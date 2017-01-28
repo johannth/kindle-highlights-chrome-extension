@@ -1,63 +1,42 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import base64 from 'base-64';
 
 import css from './index.css';
 import { fetchData } from '../actions';
 
-const sortByKey = key => (a, b) => {
-  const x = a[key];
-  const y = b[key];
-  if (x < y) {
-    return -1;
-  } else if (x > y) {
-    return 1;
-  } else {
-    return 0;
-  }
-};
+import {
+  sortByKey,
+  createDataUrl,
+  createDownloadFilesFromBook,
+  createDownloadAllFilesFromAllBooks
+} from '../utils.js';
 
-const AppPage = ({ books, highlights, loading, onReloadData }) => (
+const AppPage = ({ books, highlights, files, loading, onReloadData }) => (
   <div id="content">
     <div id="menu">
       <ReloadDataButton isLoading={loading.data} onClick={onReloadData} />
-      <DownloadAllAsJSONLink books={books} highlights={highlights} />
+      {files && (
+            <div>
+              <DownloadLink file={files.json}>
+                ⬇️ JSON
+              </DownloadLink>
+              <DownloadLink file={files.markdown}>
+                ⬇️ Markdown
+              </DownloadLink>
+            </div>
+          )}
     </div>
-    <BookList
-      books={books}
-      highlights={highlights}
-      booksLoading={loading.books}
-    />
+    <BookList books={books} highlights={highlights} />
   </div>
 );
 
-const createJsonFromAllHighlights = (books, highlights) => {
-  return {
-    books: books.reduce((accumulator, book) => {
-      if (highlights[book.id].length > 0) {
-        accumulator[book.id] = {
-          book: book,
-          highlights: highlights[book.id] || []
-        };
-      }
-      return accumulator;
-    }, {})
-  };
-};
-
 const DownloadAllAsJSONLink = ({ books, highlights }) => (
-  <DownloadLink
-    className="menu-button"
-    filename="highlights.json"
-    mediaType="application/json"
-    content={
-      JSON.stringify(createJsonFromAllHighlights(books, highlights), null, 2)
-    }
-  >
+  <DownloadLink className="menu-button" file={''}>
     Download all highlights as JSON
   </DownloadLink>
 );
+
 const ReloadDataButton = ({ isLoading, onClick }) => (
   <div
     className="menu-button"
@@ -74,15 +53,14 @@ ReloadDataButton.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
-const BookList = ({ books, highlights, booksLoading }) => (
+const BookList = ({ books, highlights }) => (
   <ul id="booklist">
     {books.map(book => (
         <li key={book.id}>
           <Book
-            id={book.id}
-            name={book.name}
+            book={book}
             highlights={highlights[book.id] || []}
-            isLoading={booksLoading[book.id]}
+            files={createDownloadFilesFromBook(book, highlights[book.id])}
           />
         </li>
       ))}
@@ -94,59 +72,56 @@ BookList.propTypes = {
   ).isRequired
 };
 
-const DownloadLink = (
-  { filename, mediaType, content, className, children }
-) => (
+const DownloadLink = ({ file, className, children }) => (
   <a
     className={className}
-    download={filename}
-    href={createDataUrl(mediaType, content)}
+    download={file.name}
+    href="#"
+    onClick={e => {
+        // createDataUrl encodes using utf8 and then base64 which is expensive
+        e.currentTarget.href = createDataUrl(file.mediaType, file.content);
+      }}
     target="_blank"
   >
     {children}
   </a>
 );
 DownloadLink.propTypes = {
-  filename: PropTypes.string.isRequired,
-  mediaType: PropTypes.string.isRequired,
-  content: PropTypes.string.isRequired
+  file: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    mediaType: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired
+  }).isRequired,
+  className: PropTypes.string
 };
 
-const createDataUrl = (mediaType, content) => {
-  const base64encodedContent = base64.encode(content);
-  return `data:${mediaType};base64,${base64encodedContent}`;
-};
-
-const Book = ({ id, name, highlights, isLoading }) => (
-  <div className={classnames('book', isLoading ? 'loading' : '')}>
-    <h4 className="book-title">{name}</h4>
-    {highlights.length > 0 && (
-          <DownloadLink
-            filename={`${id}-${name}.json`}
-            mediaType="application/json"
-            content={
-              JSON.stringify(
-                { book: { id: id, name: name }, highlights: highlights },
-                null,
-                2
-              )
-            }
-          >
-            Download {highlights.length} highlights as JSON
-          </DownloadLink>
+const Book = ({ book, highlights, files }) => (
+  <div className="book">
+    <h4 className="book-title">{book.title}</h4>
+    {files && (
+          <div>
+            <DownloadLink file={files.json}>
+              ⬇️ JSON
+            </DownloadLink>
+            <DownloadLink file={files.markdown}>
+              ⬇️ Markdown
+            </DownloadLink>
+          </div>
         )}
   </div>
 );
-Book.propTypes = {
-  id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired
-};
+Book.propTypes = { book: PropTypes.object.isRequired };
 
 const mapStateToProps = state => {
+  const sortedBooks = Object.values(state.data.books).sort(sortByKey('title'));
   return {
-    books: Object.values(state.data.books).sort(sortByKey('name')),
+    books: sortedBooks,
     loading: state.loading,
-    highlights: state.data.highlights
+    highlights: state.data.highlights,
+    files: createDownloadAllFilesFromAllBooks(
+      sortedBooks,
+      state.data.highlights
+    )
   };
 };
 

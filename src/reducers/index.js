@@ -1,60 +1,38 @@
 import { combineReducers } from 'redux';
 
-import {
-  REQUEST_DATA,
-  RECEIVE_BOOKS,
-  REQUEST_DATA_FOR_BOOK,
-  RECEIVE_DATA_FOR_BOOK,
-  RECEIVE_DATA
-} from '../actions';
-
-function dataReducer(state = { books: {}, highlights: {} }, action) {
-  switch (action.type) {
-    case RECEIVE_BOOKS:
-      const books = action.books.reduce(
-        (accumulator, nextBook) => {
-          accumulator[nextBook.id] = nextBook;
-          return accumulator;
-        },
-        {}
-      );
-      return { ...state, books };
-
-    case RECEIVE_DATA_FOR_BOOK:
-      const newHighlights = {};
-      newHighlights[action.bookId] = action.highlights;
-      const highlights = { ...state.highlights, ...newHighlights };
-      return { ...state, highlights };
-    default:
-      return state;
-  }
-}
-
-function loadingReducer(state = { data: false, books: {} }, action) {
-  switch (action.type) {
-    case REQUEST_DATA:
-      return { ...state, data: true };
-    case REQUEST_DATA_FOR_BOOK: {
-      const newBookLoadingStatus = {};
-      newBookLoadingStatus[action.bookId] = true;
-      const books = { ...state.books, ...newBookLoadingStatus };
-      return { ...state, books };
-    }
-    case RECEIVE_DATA_FOR_BOOK: {
-      const newBookLoadingStatus = {};
-      newBookLoadingStatus[action.bookId] = false;
-      const books = { ...state.books, ...newBookLoadingStatus };
-      return { ...state, books };
-    }
-    case RECEIVE_DATA:
-      return { ...state, data: false };
-    default:
-      return state;
-  }
-}
+import { REQUEST_DATA, RECEIVE_DATA_FOR_BOOK, RECEIVE_DATA } from '../actions';
 
 const rootReducer = combineReducers({
   data: dataReducer,
   loading: loadingReducer
 });
 export default rootReducer;
+
+function dataReducer(state = { books: {}, highlights: {} }, action) {
+  switch (action.type) {
+    case RECEIVE_DATA_FOR_BOOK: {
+      const newHighlights = {};
+      newHighlights[action.book.id] = action.highlights;
+      const highlights = { ...state.highlights, ...newHighlights };
+
+      const newBooks = {};
+      newBooks[action.book.id] = { ...action.book };
+      const books = { ...state.books, ...newBooks };
+
+      return { ...state, highlights, books };
+    }
+    default:
+      return state;
+  }
+}
+
+function loadingReducer(state = { data: false }, action) {
+  switch (action.type) {
+    case REQUEST_DATA:
+      return { ...state, data: true };
+    case RECEIVE_DATA:
+      return { ...state, data: false };
+    default:
+      return state;
+  }
+}

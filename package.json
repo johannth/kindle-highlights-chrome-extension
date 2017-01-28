@@ -20,6 +20,7 @@
     "redux": "^3.6.0",
     "redux-localstorage": "^0.4.1",
     "redux-logger": "^2.7.4",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "utf8": "^2.1.2"
   }
 }
