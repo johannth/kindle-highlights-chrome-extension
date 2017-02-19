@@ -13,6 +13,25 @@ export const sortByKey = key => (a, b) => {
   }
 };
 
+export const sendMessageMiddleware = ({ whitelist, blacklist }) =>
+  store => next => action => {
+    const inWhiteList = whitelist && whitelist.includes(action.type);
+    const inBlackList = blacklist && !blacklist.includes(action.type);
+    if (inWhiteList || inBlackList) {
+      console.log('Sending action', action);
+      chrome.runtime.sendMessage({ action });
+    }
+    return next(action);
+  };
+
+export const registerStoreWithChromeMessages = store => {
+  chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    if (message.action) {
+      store.dispatch(message.action);
+    }
+  });
+};
+
 export const createDownloadAllFilesFromAllBooks = (books, highlights) => {
   return {
     json: {
@@ -30,22 +49,24 @@ export const createDownloadAllFilesFromAllBooks = (books, highlights) => {
 
 const createJSONPayloadForAllBooks = (books, highlights) => {
   return {
-    books: books.reduce((accumulator, book) => {
-      if (highlights[book.id].length > 0) {
-        accumulator[book.id] = createJSONPayloadFromBook(
-          book,
-          highlights[book.id]
-        );
-      }
-      return accumulator;
-    }, {})
+    books: books.reduce(
+      (accumulator, book) => {
+        if (highlights[book.id].length > 0) {
+          accumulator[book.id] = createJSONPayloadFromBook(
+            book,
+            highlights[book.id]
+          );
+        }
+        return accumulator;
+      },
+      {}
+    )
   };
 };
 
 const createMarkdownFromAllBooks = (books, highlights) => {
-  const booksAsMarkdown = books.map(
-    book => createMarkdownFromBook(book, highlights[book.id])
-  );
+  const booksAsMarkdown = books.map(book =>
+    createMarkdownFromBook(book, highlights[book.id]));
 
   return booksAsMarkdown.join(`\n\n`);
 };
@@ -77,7 +98,7 @@ const createJSONPayloadFromBook = (book, highlights) => {
 };
 
 const createMarkdownFromBook = (book, highlights) => {
-  const header = [ `## ${book.title}`, '' ];
+  const header = [`## ${book.title}`, ''];
   const renderedHighlights = highlights.map(
     createMarkdownFromHighlight(book.Id)
   );
@@ -85,11 +106,9 @@ const createMarkdownFromBook = (book, highlights) => {
 };
 
 const createMarkdownFromHighlight = bookId => highlight => {
-  return [
-    `> ${highlight.highlight}`,
-    '',
-    `[Link](${highlight.url})`
-  ].join('\n');
+  return [`> ${highlight.highlight}`, '', `[Link](${highlight.url})`].join(
+    '\n'
+  );
 };
 
 export const createDataUrl = (mediaType, content) => {
