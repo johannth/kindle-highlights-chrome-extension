@@ -64,12 +64,14 @@ export function fetchData() {
             url: `https://kindle.amazon.com${url}`
           };
 
-          const bookHighlights = $('.highlightRow').map((i, element) => {
-            const highlight = $('.highlight', element).text();
-            const highlightLink = $('a.readMore', element).attr('href');
+          const bookHighlights = $('.highlightRow')
+            .map((i, element) => {
+              const highlight = $('.highlight', element).text();
+              const highlightLink = $('a.readMore', element).attr('href');
 
-            return { highlight: highlight, url: highlightLink };
-          }).toArray();
+              return { highlight: highlight, url: highlightLink };
+            })
+            .toArray();
 
           if (highlightCount != bookHighlights.length) {
             console.log(
@@ -79,6 +81,8 @@ export function fetchData() {
 
           dispatch(receiveDataForBook(book, bookHighlights));
 
+          dispatch(pushHighlightsToEvernote(book, bookHighlights));
+
           fetchNextPage(usedAsins, offset + bookHighlights.length);
         });
       });
@@ -87,3 +91,50 @@ export function fetchData() {
     fetchNextPage([], 0);
   };
 }
+
+export const SEND_DATA_TO_EVERNOTE = 'SEND_DATA_TO_EVERNOTE';
+function sendDataToEvernoteForBook(book, highlights) {
+  return { type: SEND_DATA_TO_EVERNOTE, book, highlights };
+}
+
+export const SEND_DATA_TO_EVERNOTE_SUCCESS = 'SEND_DATA_TO_EVERNOTE_SUCCESS';
+function sendDataToEvernoteForBookSuccess(book, highlights) {
+  return { type: SEND_DATA_TO_EVERNOTE_SUCCESS, book, highlights };
+}
+
+export const pushHighlightsToEvernote = (book, highlights) => {
+  return dispatch => {
+    dispatch(sendDataToEvernoteForBook(book, highlights));
+    const payload = {
+      highlights: highlights.map(highlight => {
+        return {
+          parentSlug: book.id,
+          parentTitle: book.title,
+          parentURL: book.url,
+          timestamp: new Date().toISOString(),
+          text: highlight.highlight,
+          url: highlight.url
+        };
+      }),
+      evernote: {
+        notebookId: '9f3ace4b-9992-485a-8be4-e39b534273a3',
+        tags: ['kindle']
+      }
+    };
+
+    fetch('https://highlights-central.herokuapp.com/highlights', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        dispatch(sendDataToEvernoteForBookSuccess(book, highlights));
+      })
+      .catch(response => {
+        console.log(response);
+      });
+  };
+};
